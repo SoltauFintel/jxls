@@ -1,5 +1,8 @@
 package org.jxls.command;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,17 +17,40 @@ import org.junit.Test;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;
 
+/**
+ * This test class checks whether grouping works with DynaBeans. (Issue 182)
+ */
 public class DynaBeanTest {
 
+    /**
+     * This testcase tests grouping with DynaBean. (Fixed with issue 182)
+     * It also checks whether DynaBeans work without grouping. (Worked before because of JEXL)
+     */
     @Test
-    public void grouping() throws Exception {
-        List<DynaBean> employees = generateDynaSampleEmployeeData();
-        try (InputStream is = getClass().getResourceAsStream("grouping_template.xlsx")) {
-            try (OutputStream os = new FileOutputStream("target/grouping_output.xlsx")) {
-                Context context = new Context();
-                context.putVar("employees", employees);
+    public void groupingWithDynaBean() throws Exception {
+        // Prepare
+        Context context = new Context();
+        context.putVar("employees", generateDynaSampleEmployeeData());
+        String out = "target/dynabean_output.xlsx";
+
+        // Test
+        try (InputStream is = getClass().getResourceAsStream("dynabean.xlsx")) {
+            try (OutputStream os = new FileOutputStream(out)) {
                 JxlsHelper.getInstance().processTemplate(is, os, context);
             }
+        }
+        
+        // Verify
+        try (TestWorkbook xls = new TestWorkbook(new File(out))) {
+            xls.selectSheet("grouping");
+            assertEquals("Elsa", xls.getCellValueAsString(2, 1));
+            assertEquals("John", xls.getCellValueAsString(3, 1));
+            assertEquals("Oleg", xls.getCellValueAsString(4, 1));
+            
+            xls.selectSheet("simple"); // no grouping
+            assertEquals("Elsa", xls.getCellValueAsString(2, 1));
+            assertEquals("Oleg", xls.getCellValueAsString(3, 1));
+            assertEquals("John", xls.getCellValueAsString(4, 1));
         }
     }
 
@@ -48,15 +74,34 @@ public class DynaBeanTest {
         return employeesDyna;
     }
 
+    /**
+     * This testcase tests grouping with Java bean. It also checks whether Java beans work without grouping.
+     */
     @Test
     public void groupingWithJavaBean() throws Exception {
-        List<TestEmployee> employees = generateStaticSampleEmployeeData();
-        try (InputStream is = getClass().getResourceAsStream("grouping_template.xlsx")) {
-            try (OutputStream os = new FileOutputStream("target/grouping_output.xlsx")) {
-                Context context = new Context();
-                context.putVar("employees", employees);
+        // Prepare
+        Context context = new Context();
+        context.putVar("employees", generateStaticSampleEmployeeData());
+        String out = "target/dynabean_output.xlsx";
+
+        // Test
+        try (InputStream is = getClass().getResourceAsStream("dynabean.xlsx")) {
+            try (OutputStream os = new FileOutputStream(out)) {
                 JxlsHelper.getInstance().processTemplate(is, os, context);
             }
+        }
+        
+        // Verify
+        try (TestWorkbook xls = new TestWorkbook(new File(out))) {
+            xls.selectSheet("grouping");
+            assertEquals("Elsa", xls.getCellValueAsString(2, 1));
+            assertEquals("John", xls.getCellValueAsString(3, 1));
+            assertEquals("Oleg", xls.getCellValueAsString(4, 1));
+            
+            xls.selectSheet("simple"); // no grouping
+            assertEquals("Elsa", xls.getCellValueAsString(2, 1));
+            assertEquals("Oleg", xls.getCellValueAsString(3, 1));
+            assertEquals("John", xls.getCellValueAsString(4, 1));
         }
     }
 

@@ -373,15 +373,28 @@ public class Util {
      * @throws IllegalAccessException
      */
     public static Object getObjectProperty(Object obj, String propertyName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (obj instanceof Map) {
+        if (obj instanceof Map) { // Map access
             return ((Map<?, ?>) obj).get(propertyName);
-        } else if (obj instanceof DynaBean) {
+
+        } else if (obj instanceof DynaBean) { // DynaBean access
             try {
                 return ((DynaBean) obj).get(propertyName);
             } catch (IllegalArgumentException e) {
                 throw new NoSuchMethodException(e.getMessage());
             }
         }
+        
+        // Java bean access
+
+        int o = propertyName.indexOf(".");
+        if (o >= 0) {
+            // Support for nested properties
+            String left = propertyName.substring(0, o);
+            String right = propertyName.substring(o + 1);
+            Object value = getObjectProperty(obj, left); // recursive
+            return getObjectProperty(value, right); // recursive
+        }
+
         String name = "get" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
         Method method = obj.getClass().getMethod(name);
         return method.invoke(obj);

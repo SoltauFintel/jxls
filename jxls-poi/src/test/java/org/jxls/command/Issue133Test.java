@@ -29,14 +29,18 @@ public class Issue133Test {
         context.putVar("employees", employees);
         
         // Test
-        File outputFile = new File("target/issue133_output.xlsx");
-        try (InputStream in = getClass().getResourceAsStream("issue133_template.xlsx")) {
+/*TODO  JxlsTester tester = JxlsTester.xlsx(getClass());
+        tester.processTemplate(context);
+*/
+        File outputFile = new File("target/Issue133Test_output.xlsx");
+        try (InputStream in = getClass().getResourceAsStream("Issue133Test.xlsx")) {
             try (FileOutputStream out = new FileOutputStream(outputFile)) {
                 JxlsHelper.getInstance().processTemplate(in, out, context);
             }
         }
         
         // Verify
+//TODO  try (TestWorkbook w = tester.getWorkbook()) {
         try (TestWorkbook w = new TestWorkbook(outputFile)) {
             w.selectSheet("GroupByNestedProperty");
             assertEquals("Mayor", w.getCellValueAsString(2, 1)); 

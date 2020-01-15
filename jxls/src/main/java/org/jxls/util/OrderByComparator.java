@@ -15,7 +15,7 @@ import org.jxls.common.JxlsException;
  * last if ascending, and first if descending.</p>
  */
 public class OrderByComparator<T> implements Comparator<T> {
-    private UtilWrapper util;
+    private final UtilWrapper util;
 
     /**
      * Sort ascending (default).
@@ -75,16 +75,13 @@ public class OrderByComparator<T> implements Comparator<T> {
                     // ordering is next.
                     if (ASC.equalsIgnoreCase(parts[1])) {
                         ordering = ORDER_ASC;
-                    }
-                    else if (DESC.equalsIgnoreCase(parts[1])) {
+                    } else if (DESC.equalsIgnoreCase(parts[1])) {
                         ordering = ORDER_DESC;
-                    }
-                    else {
+                    } else {
                         throw new JxlsException("Expected \"" + ASC + "\" or \"" + DESC + ": " + expr);
                     }
                 }
-            }
-            else {
+            } else {
                 throw new JxlsException("Expected \"property\" [" + ASC + "|" + DESC + "] : " + expr);
             }
 
@@ -122,23 +119,21 @@ public class OrderByComparator<T> implements Comparator<T> {
             try {
                 value1 = (Comparable) util.getObjectProperty(o1, property);
                 value2 = (Comparable) util.getObjectProperty(o2, property);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new JxlsException("No matching method found for \"" + property + "\".", e);
             }
             try {
                 if (value1 == null) {
-                    if (value2 == null)
+                    if (value2 == null) {
                         comp = 0;
-                }
-                else {
+                    }
+                } else {
                     comp = ordering * value1.compareTo(value2);
                 }
                 if (comp != 0) {
                     return comp;
                 }
-            }
-            catch (ClassCastException e) {
+            } catch (ClassCastException e) {
                 throw new UnsupportedOperationException("Property \"" + property + "\" needs to be Comparable.");
             }
         }
@@ -153,16 +148,18 @@ public class OrderByComparator<T> implements Comparator<T> {
      *
      * @param obj The other <code>OrderByComparator</code>.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof OrderByComparator) {
-            OrderByComparator otherComp = (OrderByComparator) obj;
+            OrderByComparator<T> otherComp = (OrderByComparator<T>) obj;
             if (mySize != otherComp.mySize) {
                 return false;
             }
             for (int i = 0; i < mySize; i++) {
-                if (!myProperties.get(i).equals(otherComp.myProperties.get(i)))
+                if (!myProperties.get(i).equals(otherComp.myProperties.get(i))) {
                     return false;
+                }
                 if (myOrderings.get(i) != otherComp.myOrderings.get(i)) {
                     return false;
                 }

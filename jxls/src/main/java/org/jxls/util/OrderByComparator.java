@@ -64,7 +64,7 @@ public class OrderByComparator<T> implements Comparator<T> {
         myProperties = new ArrayList<>(mySize);
         myOrderings = new ArrayList<>(mySize);
         for (String expr : expressions) {
-            String[] parts = expr.split("\\s+");
+            String[] parts = expr.trim().split("\\s+");
             String property;
             int ordering;
             if (parts.length > 0 && parts.length < 5) {

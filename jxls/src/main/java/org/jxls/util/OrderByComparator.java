@@ -90,23 +90,6 @@ public class OrderByComparator<T> implements Comparator<T> {
         }
     }
 
-    /**
-     * <p>Compares the given objects to determine order.  Fulfills the
-     * <code>Comparator</code> contract by returning a negative integer, 0, or a
-     * positive integer if <code>o1</code> is less than, equal to, or greater
-     * than <code>o2</code>.</p>
-     * <p>This compare method respects all properties, their order sequences,
-     * and their null order sequences.</p>
-     *
-     * @param o1 The left-hand-side object to compare.
-     * @param o2 The right-hand-side object to compare.
-     * @return A negative integer, 0, or a positive integer if <code>o1</code>
-     *    is less than, equal to, or greater than <code>o2</code>.
-     * @throws UnsupportedOperationException If any property specified in the
-     *    constructor doesn't correspond to a no-argument "get&lt;Property&gt;"
-     *    getter method in <code>T</code>, or if the property's type is not
-     *    <code>Comparable</code>.
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public int compare(T o1, T o2) throws UnsupportedOperationException {
@@ -138,52 +121,5 @@ public class OrderByComparator<T> implements Comparator<T> {
             }
         }
         return 0;
-    }
-
-    /**
-     * Indicates whether the given <code>OrderByComparator</code> is equal to
-     * this <code>OrderByComparator</code>.  All property names must match in
-     * order, and all of the order sequences and null order sequences must
-     * match.
-     *
-     * @param obj The other <code>OrderByComparator</code>.
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof OrderByComparator) {
-            OrderByComparator<T> otherComp = (OrderByComparator<T>) obj;
-            if (mySize != otherComp.mySize) {
-                return false;
-            }
-            for (int i = 0; i < mySize; i++) {
-                if (!myProperties.get(i).equals(otherComp.myProperties.get(i))) {
-                    return false;
-                }
-                if (myOrderings.get(i) != otherComp.myOrderings.get(i)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns a <code>List</code> of all properties.
-     * @return A <code>List</code> of all properties.
-     */
-    public List<String> getProperties() {
-        return myProperties;
-    }
-
-    /**
-     * Returns a <code>List</code> of orderings.
-     * @return A <code>List</code> of orderings.
-     * @see #ORDER_ASC
-     * @see #ORDER_DESC
-     */
-    public List<Integer> getOrderings() {
-        return myOrderings;
     }
 }

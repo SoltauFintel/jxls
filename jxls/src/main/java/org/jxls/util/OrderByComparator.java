@@ -102,22 +102,20 @@ public class OrderByComparator<T> implements Comparator<T> {
             try {
                 value1 = (Comparable) util.getObjectProperty(o1, property);
                 value2 = (Comparable) util.getObjectProperty(o2, property);
+            } catch (ClassCastException e) {
+                throw new JxlsException("Property \"" + property + "\" must implement Comparable.");
             } catch (Exception e) {
-                throw new JxlsException("No matching method found for \"" + property + "\".", e);
+                throw new JxlsException("Error accessing property \"" + property + "\".", e);
             }
-            try {
-                if (value1 == null) {
-                    if (value2 == null) {
-                        comp = 0;
-                    }
-                } else {
-                    comp = ordering * value1.compareTo(value2);
-                }
+            if (value1 != null && value2 != null) {
+                comp = value1.compareTo(value2) * ordering;
                 if (comp != 0) {
                     return comp;
-                }
-            } catch (ClassCastException e) {
-                throw new UnsupportedOperationException("Property \"" + property + "\" needs to be Comparable.");
+                } // else: continue with next sort attribute
+            } else if (value1 == null && value2 != null) {
+                return 1 * ordering;
+            } else if (value1 != null && value2 == null) {
+                return -1 * ordering;
             }
         }
         return 0;

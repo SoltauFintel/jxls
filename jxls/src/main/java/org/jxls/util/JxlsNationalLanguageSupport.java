@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -31,6 +33,7 @@ public abstract class JxlsNationalLanguageSupport {
     private String start = "R{";
     private String end = "}";
     private String defaultValueDelimiter = "=";
+    private Pattern pattern;
     
     /**
      * @param in XLSX input stream
@@ -51,12 +54,14 @@ public abstract class JxlsNationalLanguageSupport {
      * @param out XLSX output stream for writing the result that contains translated R{key} elements
      */
     public void process(InputStream in, OutputStream out) throws IOException, TransformerConfigurationException, ParserConfigurationException, SAXException, TransformerException, TransformerFactoryConfigurationError {
+        pattern = Pattern.compile(Pattern.quote(start) + "(.*?)" + Pattern.quote(end));
         try (ZipInputStream zipin = new ZipInputStream(in); ZipOutputStream zipout = new ZipOutputStream(out)) {
             ZipEntry zipEntry;
             while ((zipEntry = zipin.getNextEntry()) != null) {
                 processZipEntry(zipEntry, zipin, zipout);
             }
         }
+        pattern = null;
     }
 
     protected void processZipEntry(ZipEntry zipEntry, InputStream in, ZipOutputStream zipout) throws IOException, ParserConfigurationException, SAXException, TransformerException {
@@ -115,23 +120,22 @@ public abstract class JxlsNationalLanguageSupport {
         }
     }
 
-    protected String translateAll(String xml) {
-        int o = xml.indexOf(start);
-        int oo = xml.indexOf(end, o + start.length());
-        while (o >= 0 && oo > o) {
-            String name = xml.substring(o + start.length(), oo);
+    protected String translateAll(String text) {
+        StringBuffer ret = new StringBuffer();
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            String name = matcher.group(1);
             String fallback = name;
-            if (name.contains(defaultValueDelimiter)) {
-                fallback = name.substring(name.indexOf(defaultValueDelimiter) + defaultValueDelimiter.length());
-                name = name.substring(0, name.indexOf(defaultValueDelimiter));
+            int o = name.indexOf(defaultValueDelimiter);
+            if (o > 0) {
+                fallback = name.substring(o + defaultValueDelimiter.length());
+                name = name.substring(0, o);
             }
-            String result = translate(name, fallback);
-            xml = xml.substring(0, o) + result + xml.substring(oo + end.length());
-
-            o = xml.indexOf(start);
-            oo = xml.indexOf(end, o + start.length());
+            String newValue = translate(name, fallback);
+            matcher.appendReplacement(ret, newValue);
         }
-        return xml;
+        matcher.appendTail(ret);
+        return ret.toString();
     }
 
     protected abstract String translate(String name, String fallback);

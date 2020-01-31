@@ -42,9 +42,7 @@ public class PivotTableTest {
         File out = new File("target/" + getClass().getSimpleName() + "_output.xlsx");
         try (InputStream is = new FileInputStream(temp)) {
             try (OutputStream os = new FileOutputStream(out)) {
-                JxlsHelper jxls = JxlsHelper.getInstance();
-                jxls.setEvaluateFormulas(true);
-                jxls.processTemplate(is, os, context);
+                JxlsHelper.getInstance().processTemplate(is, os, context);
             }
         }
         temp.delete();

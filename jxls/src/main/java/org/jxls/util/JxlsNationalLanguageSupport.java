@@ -29,6 +29,15 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
+/**
+ * With R{key} in the Excel XLSX template file, resource bundles can be accessed to realize multilingualism.
+ * This is the JXLS standard solution since 2.8.0. It is particularly necessary when using PivotTables.
+ * Usually this class is called before the actual JXLS processing in order to create
+ * a modified temporary template file from the given template file.
+ * With R{key=defaultValue}, a default value can be specified for the case that there is no value for the key.
+ * Otherwise key is the fallback value.
+ * The notation can be adjusted using setStart, setEnd and setDefaultValueDelimiter.
+ */
 public abstract class JxlsNationalLanguageSupport {
     private String start = "R{";
     private String end = "}";
@@ -115,7 +124,7 @@ public abstract class JxlsNationalLanguageSupport {
                     item.setTextContent(newValue);
                 }
             } else if (item instanceof Element) {
-                processElement((Element) item);
+                processElement((Element) item); // recursive
             }
         }
     }
@@ -131,7 +140,7 @@ public abstract class JxlsNationalLanguageSupport {
                 fallback = name.substring(o + defaultValueDelimiter.length());
                 name = name.substring(0, o);
             }
-            String newValue = translate(name, fallback);
+            String newValue = translate(name.trim(), fallback);
             matcher.appendReplacement(ret, newValue);
         }
         matcher.appendTail(ret);

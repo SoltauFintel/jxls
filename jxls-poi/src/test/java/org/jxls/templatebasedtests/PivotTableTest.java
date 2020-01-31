@@ -58,8 +58,9 @@ public class PivotTableTest {
             Assert.assertEquals("Salary (EN)", w.getCellValueAsString(1, 3));
             Assert.assertEquals("Sven", w.getCellValueAsString(2, 1));
             w.selectSheet("Crosstab");
-// TODO           Assert.assertEquals("BU", w.getCellValueAsString(7, 3)); // C7
-//            Assert.assertEquals("Finance", w.getCellValueAsString(8, 3)); // C8
+            Assert.assertTrue(w.getCellValueAsString(7, 4).contains("Salary (EN)"));
+            // It's not possible to verify the PivotTable values because it's calculated when opening in Excel.
+            // Best verification is to look at the result file using MS Excel.
         }
     }
 
@@ -67,8 +68,8 @@ public class PivotTableTest {
         List<Employee> list = new ArrayList<>();
         add(list, "Sven", "Mayor", 100000);
         add(list, "Christiane", "Finance", 30000);
-        add(list, "Betty", "Finance", 45000);
         add(list, "John", "Main", 50000);
+        add(list, "Betty", "Finance", 45000);
         add(list, "Waldemar", "Main", 60000);
         return list;
     }

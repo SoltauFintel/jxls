@@ -32,14 +32,13 @@ public class PivotTableTest {
         resourceBundle.put("salary", "Salary (EN)");
         
         // Test
-        File in = new File(getClass().getResource(getClass().getSimpleName() + ".xlsx").toURI());
         JxlsNationalLanguageSupport nls = new JxlsNationalLanguageSupport() {
             @Override
             protected String translate(String name, String fallback) {
                 return resourceBundle.getProperty(name, fallback);
             }
         };
-        File temp = nls.process(in); // do preprocessing of template file
+        File temp = nls.process(getClass().getResourceAsStream(getClass().getSimpleName() + ".xlsx")); // do preprocessing of template file
         File out = new File("target/" + getClass().getSimpleName() + "_output.xlsx");
         try (InputStream is = new FileInputStream(temp)) {
             try (OutputStream os = new FileOutputStream(out)) {

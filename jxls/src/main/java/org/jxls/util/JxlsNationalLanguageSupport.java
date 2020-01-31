@@ -1,106 +1,146 @@
 package org.jxls.util;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 public abstract class JxlsNationalLanguageSupport {
     private String start = "R{";
     private String end = "}";
     private String defaultValueDelimiter = "=";
-    protected boolean changed;
     
     /**
-     * @param in XLSX file
+     * @param in XLSX input stream
      * @return new temp file. Caller must delete it.
      */
-    public File process(File in) {
+    public File process(InputStream in) {
         try {
             File out = File.createTempFile("JXLS-R-", ".xlsx");
-            process(in, out);
+            process(in, new FileOutputStream(out));
             return out;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * @param in XLSX file that contain R{key} elements
-     * @param out XLSX file with translated R{key} elements
-     * @throws IOException
+     * @param in XLSX input stream that contain R{key} elements
+     * @param out XLSX output stream for writing the result that contains translated R{key} elements
      */
-    public void process(File in, File out) throws IOException {
-        try (ZipFile zipFile = new ZipFile(in); ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(out))) {
-            for (Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements(); ) {
-                processZipEntry(entries.nextElement(), zipFile, zipout);
+    public void process(InputStream in, OutputStream out) throws IOException, TransformerConfigurationException, ParserConfigurationException, SAXException, TransformerException, TransformerFactoryConfigurationError {
+        try (ZipInputStream zipin = new ZipInputStream(in); ZipOutputStream zipout = new ZipOutputStream(out)) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zipin.getNextEntry()) != null) {
+                processZipEntry(zipEntry, zipin, zipout);
             }
         }
     }
 
-    protected void processZipEntry(ZipEntry zipEntry, ZipFile zipin, ZipOutputStream zipout) throws IOException {
-        boolean copy = true;
+    protected void processZipEntry(ZipEntry zipEntry, InputStream in, ZipOutputStream zipout) throws IOException, ParserConfigurationException, SAXException, TransformerException {
         zipout.putNextEntry(new ZipEntry(zipEntry.getName()));
         if (zipEntry.getName().toLowerCase().endsWith(".xml")) {
-            try (InputStream bis = new BufferedInputStream(zipin.getInputStream(zipEntry))) {
-                int len = bis.available();
-                if (len > 0) {
-                    byte[] buffer = new byte[len];
-                    bis.read(buffer, 0, len);
-
-                    byte result[] = translateAll(new String(buffer)).getBytes();
-
-                    zipout.write(changed ? result : buffer);
-                    copy = false;
-                }
-            }
-        }
-        if (copy) {
-            copy(zipEntry, zipin, zipout);
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document dom = builder.parse(getNoCloseInputStream(in));
+            processElement(dom.getDocumentElement());
+            javax.xml.transform.TransformerFactory.newInstance().newTransformer().transform(new DOMSource(dom), new StreamResult(zipout));
+        } else {
+            transfer(in, zipout);
         }
         zipout.closeEntry();
     }
 
-    protected String translateAll(String xml) {
-        changed = false;
-        if (xml.contains(start)) {
-            int o = xml.indexOf(start);
-            int oo = xml.indexOf(end, o + start.length());
-            while (o >= 0 && oo > o) {
-                String name = xml.substring(o + start.length(), oo);
-                String org = name;
-                String fallback = name;
-                if (name.contains(defaultValueDelimiter)) {
-                    fallback = name.substring(name.indexOf(defaultValueDelimiter) + 1);
-                    name = name.substring(0, name.indexOf(defaultValueDelimiter));
-                }
-                String result = translate(name, fallback);
-                if (!org.equals(result)) {
-                    changed = true;
-                }
-
-                xml = xml.substring(0, o) + result + xml.substring(oo + end.length());
-
-                o = xml.indexOf(start);
-                oo = xml.indexOf(end, o + start.length());
+    private InputStream getNoCloseInputStream(final InputStream in) {
+        return new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return in.read();
             }
+            
+            @Override
+            public void close() throws IOException { // Do not close after reading a single Zip file entry.
+            }
+        };
+    }
+    
+    private void processElement(Element root) {
+        // Attributes
+        NamedNodeMap attributes = root.getAttributes();
+        for (int i = 0; i < attributes.getLength(); i++) {
+            Node item = attributes.item(i);
+            if (item instanceof Attr) {
+                String val = ((Attr) item).getValue();
+                String newValue = translateAll(val);
+                if (!val.equals(newValue)) {
+                    ((Attr) item).setValue(newValue);
+                }
+            }
+        }
+
+        // Text and sub elements
+        NodeList children = root.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node item = children.item(i);
+            if (item instanceof Text) {
+                String val = ((Text) item).getTextContent();
+                String newValue = translateAll(val);
+                if (!val.equals(newValue)) {
+                    item.setTextContent(newValue);
+                }
+            } else if (item instanceof Element) {
+                processElement((Element) item);
+            }
+        }
+    }
+
+    protected String translateAll(String xml) {
+        int o = xml.indexOf(start);
+        int oo = xml.indexOf(end, o + start.length());
+        while (o >= 0 && oo > o) {
+            String name = xml.substring(o + start.length(), oo);
+            String fallback = name;
+            if (name.contains(defaultValueDelimiter)) {
+                fallback = name.substring(name.indexOf(defaultValueDelimiter) + defaultValueDelimiter.length());
+                name = name.substring(0, name.indexOf(defaultValueDelimiter));
+            }
+            String result = translate(name, fallback);
+            xml = xml.substring(0, o) + result + xml.substring(oo + end.length());
+
+            o = xml.indexOf(start);
+            oo = xml.indexOf(end, o + start.length());
         }
         return xml;
     }
 
     protected abstract String translate(String name, String fallback);
 
-    protected void copy(ZipEntry zipEntry, ZipFile zipin, ZipOutputStream zipout) throws IOException {
-        InputStream is = zipin.getInputStream(zipEntry);
+    protected void transfer(InputStream in, OutputStream out) throws IOException {
         byte[] buf = new byte[8192];
         int len;
-        while ((len = is.read(buf)) > 0) {
-            zipout.write(buf, 0, len);
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
         }
     }
     

@@ -10,7 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-public abstract class NlsHelper { // TODO better class name ?
+public abstract class JxlsNationalLanguageSupport {
     private String start = "R{";
     private String end = "}";
     private String defaultValueDelimiter = "=";

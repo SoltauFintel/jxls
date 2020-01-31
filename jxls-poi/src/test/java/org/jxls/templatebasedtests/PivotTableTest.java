@@ -15,7 +15,7 @@ import org.jxls.TestWorkbook;
 import org.jxls.common.Context;
 import org.jxls.entity.Employee;
 import org.jxls.util.JxlsHelper;
-import org.jxls.util.NlsHelper;
+import org.jxls.util.JxlsNationalLanguageSupport;
 
 public class PivotTableTest {
 
@@ -27,19 +27,19 @@ public class PivotTableTest {
         // Prepare
         final Context context = new Context();
         context.putVar("employees", getTestData());
-        final Properties nls = new Properties();
-        nls.put("name", "Name (EN)");
-        nls.put("salary", "Salary (EN)");
+        final Properties resourceBundle = new Properties();
+        resourceBundle.put("name", "Name (EN)");
+        resourceBundle.put("salary", "Salary (EN)");
         
         // Test
         File in = new File(getClass().getResource(getClass().getSimpleName() + ".xlsx").toURI());
-        NlsHelper r = new NlsHelper() {
+        JxlsNationalLanguageSupport nls = new JxlsNationalLanguageSupport() {
             @Override
             protected String translate(String name, String fallback) {
-                return nls.getProperty(name, fallback);
+                return resourceBundle.getProperty(name, fallback);
             }
         };
-        File temp = r.process(in);
+        File temp = nls.process(in); // do preprocessing of template file
         File out = new File("target/" + getClass().getSimpleName() + "_output.xlsx");
         try (InputStream is = new FileInputStream(temp)) {
             try (OutputStream os = new FileOutputStream(out)) {

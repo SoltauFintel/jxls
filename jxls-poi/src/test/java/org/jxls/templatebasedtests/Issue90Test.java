@@ -17,7 +17,6 @@ import org.jxls.examples.GridCommandDemo;
  */
 public class Issue90Test {
 
-    @org.junit.Ignore // TODO #90
     @Test
     public void test() throws IOException {
         // Prepare

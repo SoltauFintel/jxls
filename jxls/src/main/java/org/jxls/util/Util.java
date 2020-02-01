@@ -111,42 +111,64 @@ public class Util {
      * @return a range containing all the cell references if such range exists or otherwise the passed cells separated by commas
      */
     public static String createTargetCellRef(List<CellRef> targetCellDataList) {
-        String resultRef = "";
+        // testcase: UtilCreateTargetCellRefTest. Can be optimized in Java 8.
         if (targetCellDataList == null || targetCellDataList.isEmpty()) {
-            return resultRef;
+            return "";
+        } else if (targetCellDataList.size() == 1) {
+            return targetCellDataList.get(0).getCellName();
         }
-        List<String> cellRefs = new ArrayList<String>();
         boolean rowRange = true;
         boolean colRange = true;
-        Iterator<CellRef> iterator = targetCellDataList.iterator();
-        CellRef firstCellRef = iterator.next();
-        cellRefs.add(firstCellRef.getCellName());
-        String sheetName = firstCellRef.getSheetName();
-        int row = firstCellRef.getRow();
-        int col = firstCellRef.getCol();
-        while (iterator.hasNext()) {
-            CellRef cellRef = iterator.next();
-            if ((rowRange || colRange) && !cellRef.getSheetName().equals(sheetName)) {
+        boolean sameSheetNames = true;
+        for (int i = 1; i < targetCellDataList.size(); i++) {
+            CellRef cellRef = targetCellDataList.get(i);
+            CellRef prev = targetCellDataList.get(i - 1);
+            if ((rowRange || colRange) && !cellRef.getSheetName().equals(prev.getSheetName())) {
                 rowRange = false;
                 colRange = false;
+                sameSheetNames = false;
+                break;
             }
-            if (rowRange && !(cellRef.getRow() - row == 1 && cellRef.getCol() == col)) {
+            if (rowRange && !(cellRef.getRow() - prev.getRow() == 1 && cellRef.getCol() == prev.getCol())) {
                 rowRange = false;
             }
-            if (colRange && !(cellRef.getCol() - col == 1 && cellRef.getRow() == row)) {
+            if (colRange && !(cellRef.getCol() - prev.getCol() == 1 && cellRef.getRow() == prev.getRow())) {
                 colRange = false;
             }
-            sheetName = cellRef.getSheetName();
-            row = cellRef.getRow();
-            col = cellRef.getCol();
-            cellRefs.add(cellRef.getCellName());
         }
-        if ((rowRange || colRange) && cellRefs.size() > 1) {
-            resultRef = cellRefs.get(0) + ":" + cellRefs.get(cellRefs.size() - 1);
+        if (rowRange || colRange || (sameSheetNames && isAreaWithoutGaps(targetCellDataList))) {
+            return targetCellDataList.get(0).getCellName() + ":" + targetCellDataList.get(targetCellDataList.size() - 1).getCellName();
         } else {
-            resultRef = joinStrings(cellRefs, ",");
+            List<String> cellRefs = new ArrayList<String>();
+            for (CellRef cellRef : targetCellDataList) {
+                cellRefs.add(cellRef.getCellName());
+            }
+            return joinStrings(cellRefs, ",");
         }
-        return resultRef;
+    }
+
+    // [[S!G14, S!H14, S!I14, S!J14],
+    //  [S!G15, S!H15, S!I15, S!J15],
+    //  [S!G16, S!H16, S!I16, S!J16]]
+    // => S!G14:S!J16
+    private static boolean isAreaWithoutGaps(List<CellRef> targetCellDataList) {
+        // This is a possible solution. But the call to the already existing method groupByRowRange() might be too expensive. createTargetCellRef()
+        // is called very often.
+        List<List<CellRef>> groupedRows = groupByRowRange(targetCellDataList);
+        for (int i = 1; i < groupedRows.size(); i++) {
+            List<CellRef> row = groupedRows.get(i);
+            List<CellRef> prevRow = groupedRows.get(i - 1);
+            if (row.size() != prevRow.size()) {
+                return false;
+            }
+            for (int j = 0; j < row.size(); j++) {
+                if (row.get(j).getCol() != prevRow.get(j).getCol()
+                        || row.get(j).getRow() - prevRow.get(j).getRow() != 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -563,7 +585,7 @@ public class Util {
             throw new JxlsException(collectionName + " expression is not a collection or an array");
         }
         List<Object> ret = new ArrayList<>();
-        for (Object i : (Iterable) collectionObject) {
+        for (Object i : (Iterable<?>) collectionObject) {
             ret.add(i);
         }
         return ret;

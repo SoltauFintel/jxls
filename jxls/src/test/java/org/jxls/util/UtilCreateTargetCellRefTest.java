@@ -1,6 +1,7 @@
 package org.jxls.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -54,7 +55,6 @@ public class UtilCreateTargetCellRefTest {
                 "G14", "Sheet2!G15");
     }
 
-    @org.junit.Ignore // TODO #90
     @Test // issue #90
     public void rectangle() {
         check("S!G14:S!J16", // expectation
@@ -74,6 +74,16 @@ public class UtilCreateTargetCellRefTest {
         // This input might not be realistic for JXLS but it tests createTargetCellRef().
         check("S!G14,S!H14,Sheet2!G15,S!H15", // expectation: no area
                 "G14", "H14", "Sheet2!G15", "H15");
+    }
+
+    @Test
+    public void argIsNull() {
+        Assert.assertEquals("", Util.createTargetCellRef(null));
+    }
+
+    @Test
+    public void argIsEmpty() {
+        Assert.assertEquals("", Util.createTargetCellRef(Collections.<CellRef>emptyList()));
     }
 
     private void check(String expected, String... cellRefs) {

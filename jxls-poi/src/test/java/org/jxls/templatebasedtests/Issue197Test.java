@@ -18,7 +18,6 @@ import org.jxls.common.Context;
  */
 public class Issue197Test {
 
-    @org.junit.Ignore // TODO ignored because bug needs to be fixed
     @Test
     public void test() {
         // Prepare

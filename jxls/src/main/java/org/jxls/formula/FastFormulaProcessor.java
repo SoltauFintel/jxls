@@ -104,7 +104,8 @@ public class FastFormulaProcessor extends AbstractFormulaProcessor {
                 targetFormulaString = targetFormulaString.replaceAll(sheetNameReplacementRegex, "");
                 // if there were no regular or jointed cell references found for this formula use a default value
                 // if set or 0
-                if (isFormulaCellRefsEmpty && isFormulaJointedCellRefsEmpty && !formulaCellData.isParameterizedFormulaCell()) {
+                if (isFormulaCellRefsEmpty && isFormulaJointedCellRefsEmpty
+                        && (!formulaCellData.isParameterizedFormulaCell() || formulaCellData.isJointedFormulaCell())) {
                     targetFormulaString = formulaCellData.getDefaultValue() != null ? formulaCellData.getDefaultValue() : "0";
                 }
                 CellRef ref = new CellRef(

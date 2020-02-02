@@ -48,6 +48,7 @@ public class CellData {
     private static final Pattern ATTR_REGEX_PATTERN = Pattern.compile(ATTR_REGEX);
     private static final String FORMULA_STRATEGY_PARAM = "formulaStrategy";
     private static final String DEFAULT_VALUE = "defaultValue";
+    public static final String JOINTED_CELL_PREFIX = "U_";
     private static Logger logger = LoggerFactory.getLogger(CellData.class);
 
     public enum CellType {
@@ -211,6 +212,10 @@ public class CellData {
 
     public boolean isParameterizedFormulaCell(){
         return isFormulaCell() && isUserFormula(cellValue.toString());
+    }
+
+    public boolean isJointedFormulaCell(){
+        return isParameterizedFormulaCell() && cellValue.toString().contains(JOINTED_CELL_PREFIX);
     }
 
     public boolean addTargetPos(CellRef cellRef) {

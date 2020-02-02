@@ -1,6 +1,8 @@
 package org.jxls.templatebasedtests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +10,9 @@ import java.util.Collections;
 import org.junit.Test;
 import org.jxls.JxlsTester;
 import org.jxls.TestWorkbook;
+import org.jxls.common.CellData;
+import org.jxls.common.CellData.CellType;
+import org.jxls.common.CellRef;
 import org.jxls.common.Context;
 
 /**
@@ -59,5 +64,12 @@ public class Issue197Test {
         public double getCost() {
             return cost;
         }
+    }
+    
+    @Test
+    public void testU_() {
+        CellData cellData = new CellData(new CellRef(1, 1), CellType.FORMULA, "$[CHATEAU_CHAMBRES * 0.9]");
+        assertTrue(cellData.isParameterizedFormulaCell());
+        assertFalse(cellData.isJointedFormulaCell());
     }
 }

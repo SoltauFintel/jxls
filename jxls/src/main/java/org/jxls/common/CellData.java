@@ -210,11 +210,11 @@ public class CellData {
         return formula != null;
     }
 
-    public boolean isParameterizedFormulaCell(){
+    public boolean isParameterizedFormulaCell() {
         return isFormulaCell() && isUserFormula(cellValue.toString());
     }
 
-    public boolean isJointedFormulaCell(){
+    public boolean isJointedFormulaCell() {
         return isParameterizedFormulaCell() && cellValue.toString().contains(JOINTED_CELL_PREFIX);
     }
 
@@ -251,7 +251,7 @@ public class CellData {
         if (cellType == CellType.STRING && cellValue != null) {
             String strValue = cellValue.toString();
             if (isUserFormula(strValue)) {
-                String formulaStr = strValue.substring(2, strValue.length() - 1);
+                String formulaStr = strValue.substring(USER_FORMULA_PREFIX.length(), strValue.length() - USER_FORMULA_SUFFIX.length());
                 evaluate(formulaStr, context);
                 if (evaluationResult != null) {
                     targetCellType = CellType.FORMULA;
@@ -269,7 +269,7 @@ public class CellData {
     }
 
     private static boolean isUserFormula(String str) {
-        return str.startsWith(CellData.USER_FORMULA_PREFIX) && str.endsWith(CellData.USER_FORMULA_SUFFIX);
+        return str.startsWith(USER_FORMULA_PREFIX) && str.endsWith(USER_FORMULA_SUFFIX);
     }
     
     private void evaluate(String strValue, Context context) {

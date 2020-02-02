@@ -1,12 +1,17 @@
-Jxls
-=====
+# JXLS
 
-Overview
---------
-[Jxls](http://jxls.sf.net/) is a small and simple to use Java library for Excel generation.
+![Java CI](https://github.com/SoltauFintel/jxls/workflows/Java%20CI/badge.svg)
 
-Jxls abstracts Excel generation from underlying java-to-excel low-level processing library.
+[JXLS](http://jxls.sf.net) is a small and simple to use Java library for Excel file generation using Excel template files.
 
 Jxls uses a special markup in Excel templates to define output formatting and data layout.
 
-The module contains source code for [Jxls Core](http://jxls.sf.net/)
+The default implementation is based on [Apache POI](https://poi.apache.org).
+
+## Eclipse
+
+    gradlew eclipse
+
+## Build
+
+    gradlew build

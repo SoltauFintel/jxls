@@ -13,6 +13,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.7
+    - name: change dir
+      run: cd jxls
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle

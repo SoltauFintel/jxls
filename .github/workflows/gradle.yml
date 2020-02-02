@@ -16,4 +16,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x jxls/gradlew
     - name: Build with Gradle
-      run: cd jxls && ./gradlew build
+      run: cd jxls && mkdir target && ./gradlew build

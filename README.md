@@ -10,8 +10,10 @@ The default implementation is based on [Apache POI](https://poi.apache.org).
 
 ## Eclipse
 
+    cd jxls
     gradlew eclipse
 
 ## Build
 
+    cd jxls
     gradlew build

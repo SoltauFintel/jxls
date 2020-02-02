@@ -1,6 +1,8 @@
 Jxls v2.8.0 is released!
 ========================
 
+**This is only a temporary playground "JXLS on Github". 2.8.0 is still in development.**
+
 TODO: intro sentence
 
 ###### The latest component versions

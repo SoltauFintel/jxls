@@ -1,5 +1,12 @@
+/*.iml
+/target/
+/.idea/
 /bin/
+/.classpath
+/.project
+/derby.log
 /.gradle/
 /build/
-/derby.log
 /build.xml
+/.settings/
+/.project

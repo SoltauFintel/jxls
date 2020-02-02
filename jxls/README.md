@@ -5,3 +5,11 @@
 Jxls uses a special markup in Excel templates to define output formatting and data layout.
 
 The default implementation is based on [Apache POI](https://poi.apache.org).
+
+## Eclipse
+
+    gradlew eclipse
+
+## Build
+
+    gradlew build

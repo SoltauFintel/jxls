@@ -1,6 +1,6 @@
 ---
 layout: page
-title: JXLS (title)
+title: JXLS
 ---
 
 

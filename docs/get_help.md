@@ -1,3 +1,8 @@
+---
+layout: page
+title: Documentation.
+---
+
 Documentation
 --------------
 The main source for the documentation for Jxls-2 is this site.

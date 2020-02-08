@@ -1,5 +1,7 @@
-Version History
-==============
+---
+layout: page
+title: Version History
+---
 
 v2.8.0
 -----------

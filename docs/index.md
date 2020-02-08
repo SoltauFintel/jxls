@@ -13,6 +13,14 @@ TODO: intro sentence
 
 * org.jxls:jxls-reader:2.0.6
 
+Content
+-------
+* [Changes](changes.html)
+* [License](license.html)
+* [Get help](get_help.html)
+* [Source code](source_code.html)
+* [Tutorial](tutorial.html)
+
 Introduction
 ------------
 Jxls is a small Java library to make generation of Excel reports easy.

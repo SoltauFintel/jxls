@@ -1,3 +1,9 @@
+---
+layout: page
+title: JXLS (title)
+---
+
+
 Jxls v2.8.0 is released!
 ========================
 

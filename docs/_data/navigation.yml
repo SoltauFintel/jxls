@@ -1,0 +1,8 @@
+# documentation links
+docs:
+  - title: Ebene 1
+    children:
+      - title: "Changes"
+        url: /docs/changes.html
+      - title: "Get help"
+        url: /docs/get_help.html

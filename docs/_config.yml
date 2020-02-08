@@ -1,8 +1,0 @@
-theme: jekyll-theme-leap-day
-defaults:
-  - scope:
-      path: ""
-      type: docs
-    values:
-      sidebar:
-        nav: "docs"
